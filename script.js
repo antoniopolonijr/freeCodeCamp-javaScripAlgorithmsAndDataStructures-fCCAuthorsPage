@@ -35,10 +35,25 @@ fetch("https://cdn.freecodecamp.org/curriculum/news-author-page/authors.json")
     // First, remove the console log statement showing authorDataArr. Then, call the displayAuthors function with the authorDataArr array and .slice(). Use the startingIndex variable for the starting point and the endingIndex variable for the ending point.
   })
   .catch((err) => {
+    authorContainer.innerHTML = `<p class="error-msg">There was an error loading the authors</p>`;
     // The .catch() method is another asynchronous JavaScript method you can use to handle errors. This is useful in case the Promise gets rejected. Chain .catch() to the last .then(). Pass in a callback function with err as the parameter. Inside the callback, use console.error() to log possible errors to the console with the text There was an error: ${err}
     // Note: Now you can terminate your code with a semicolon. You couldn't do that in the previous steps because you'll signal to JavaScript to stop parsing your code, which will affect the fetch() syntax.
-    console.error(`There was an error: ${err}`);
+    // console.error(`There was an error: ${err}`); // what if there's an error and the author data fail to load? Then we need to show an error in the UI. That's exactly what the .catch() method is for – handling errors.Inside the .catch(), remove the console.error() and set the innerHTML of the authorContainer to a p element with the class "error-msg" and text "There was an error loading the authors".
   });
+
+// function to incrementing the startingIndex and endingIndex variables to make the Load More Authors button fetch more authors
+const fetchMoreAuthors = () => {
+  startingIndex += 8;
+  endingIndex += 8;
+  displayAuthors(authorDataArr.slice(startingIndex, endingIndex));
+  // if you click the Load More Authors button a couple of times, you'll see that it won't add more authors to the page. That's because you've reached the end of the authors list. For a better user experience, you should make it clear when there's no more data to display by disabling the button and changing its text
+  if (authorDataArr.length <= endingIndex) {
+    // meaning there's no more data to load.
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.style.cursor = "not-allowed"; // If you keep clicking the Load More Authors button until there's no more data to load and the text changes to "No more data to load", the cursor value is still pointer. Why not change the cursor value to not-allowed instead?
+    loadMoreBtn.textContent = "No more data to load";
+  }
+};
 
 // Now you'll create a function to populate the UI with the author data. You will call this function inside the second .then() method.
 const displayAuthors = (authors) => {
@@ -47,9 +62,14 @@ const displayAuthors = (authors) => {
     authorContainer.innerHTML += `<div id="${index}" class="user-card">
     <h2 class="author-name">${author}</h2>
     <img class="user-img" src="${image}" alt="${author} avatar" />
-    <p class="bio">${bio}</p>
+    <div class="purple-divider"></div>
+    <p class="bio">${bio.length > 50 ? bio.slice(0, 50) + "..." : bio}</p>
       <a class="author-link" href="${url}" target="_blank">${author}'s author page</a>
     </div>
     `;
+    // Some of the author bios are much longer than others. To give the cards a uniform look, you can extract the first 50 characters of each one and replace the rest with an ellipsis ("..."). Otherwise, you can show the entire bio.
   });
 };
+
+// to make the Load More Authors button fetch more authors whenever it's clicked.
+loadMoreBtn.addEventListener("click", fetchMoreAuthors);
